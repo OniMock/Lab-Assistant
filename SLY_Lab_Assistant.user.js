@@ -2132,7 +2132,7 @@
                 } else {
                     console.log(`[${userFleets[i].label}] Whomp whomp`);
                 }
-                let strike = scanCondition < userFleets[i].scanMin && (Date.now() - userFleets[i].scanSectorStart) >= 120000 ? true : false;
+                let strike = scanCondition < userFleets[i].scanMin && (Date.now() - userFleets[i].scanSectorStart) >= 240000 ? true : false;
                 console.log(`[${userFleets[i].label}] strike: ${strike}`);
                 userFleets[i].scanSkipCnt = strike ? userFleets[i].scanSkipCnt + 1 : 0;
                 let nextMoveIdx = userFleets[i].scanBlockIdx > 2 ? 0 : userFleets[i].scanBlockIdx+1;
