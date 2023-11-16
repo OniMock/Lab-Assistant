@@ -2140,11 +2140,12 @@
                 console.log(`[${userFleets[i].label}] Tools Remaining: ${changesTool.postBalance}`);
                 userFleets[i].toolCnt = changesTool.postBalance;
                 userFleets[i].sduCnt = changesSDU.postBalance;
-                if (userFleets[i].scanSkipCnt < 4) {
+                if (userFleets[i].scanSkipCnt < 10) {
                     userFleets[i].state = `Scanning [${scanCondition}%]`;
                     userFleets[i].scanEnd = Date.now() + (userFleets[i].scanCooldown * 1000 + 2000);
                 } else {
-                    userFleets[i].scanEnd = Date.now() + 600000;
+                    // Paused - 1 min
+                    userFleets[i].scanEnd = Date.now() + 60000;
                     userFleets[i].state = `Scanning Paused [${new Date(userFleets[i].scanEnd).toLocaleTimeString()}]`;
                     console.log(`[${userFleets[i].label}] Scanning Paused due to low probability [${new Date(userFleets[i].scanEnd).toLocaleTimeString()}]`);
                     userFleets[i].scanSkipCnt = 0;
