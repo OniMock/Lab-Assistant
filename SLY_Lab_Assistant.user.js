@@ -302,6 +302,8 @@
                 let fleetDest = fleetParsedData && fleetParsedData.dest ? fleetParsedData.dest : '';
                 let fleetScanBlock = fleetParsedData && fleetParsedData.scanBlock ? fleetParsedData.scanBlock : [];
                 let fleetScanMin = fleetParsedData && fleetParsedData.scanMin ? fleetParsedData.scanMin : 10;
+                let fleetScanNewCooldown = fleetParsedData && fleetParsedData.scanNewCooldown ? fleetParsedData.scanNewCooldown : 1;
+                let fleetScanSameSpot = fleetParsedData && fleetParsedData.scanSameSpot ? fleetParsedData.scanSameSpot : 4;
                 let fleetScanMove = fleetParsedData && fleetParsedData.scanMove == 'false' ? 'false' : 'true';
                 let fleetMineResource = fleetParsedData && fleetParsedData.mineResource ? fleetParsedData.mineResource : '';
                 let fleetStarbase = fleetParsedData && fleetParsedData.starbase ? fleetParsedData.starbase : '';
@@ -317,7 +319,7 @@
                 let fleetAcctInfo = await solanaConnection.getAccountInfo(fleet.publicKey);
                 let [fleetState, extra] = getFleetState(fleetAcctInfo);
                 let fleetCoords = fleetState == 'Idle' && extra ? extra : [];
-                userFleets.push({publicKey: fleet.publicKey, label: fleetLabel.replace(/\0/g, ''), state: fleetState, moveTarget: fleetMoveTarget, startingCoords: fleetCoords, cargoHold: fleet.account.cargoHold, fuelTank: fleet.account.fuelTank, ammoBank: fleet.account.ammoBank, repairKitToken: fleetRepairKitToken, sduToken: fleetSduToken, fuelToken: fleetFuelToken, warpFuelConsumptionRate: fleet.account.stats.movementStats.warpFuelConsumptionRate, warpSpeed: fleet.account.stats.movementStats.warpSpeed, maxWarpDistance: fleet.account.stats.movementStats.maxWarpDistance, subwarpFuelConsumptionRate: fleet.account.stats.movementStats.subwarpFuelConsumptionRate, subwarpSpeed: fleet.account.stats.movementStats.subwarpSpeed, cargoCapacity: fleet.account.stats.cargoStats.cargoCapacity, fuelCapacity: fleet.account.stats.cargoStats.fuelCapacity, ammoCapacity: fleet.account.stats.cargoStats.ammoCapacity, scanCost: fleet.account.stats.miscStats.scanRepairKitAmount, scanCooldown: fleet.account.stats.miscStats.scanCoolDown, warpCooldown: fleet.account.stats.movementStats.warpCoolDown, miningRate: fleet.account.stats.cargoStats.miningRate, foodConsumptionRate: fleet.account.stats.cargoStats.foodConsumptionRate, ammoConsumptionRate: fleet.account.stats.cargoStats.ammoConsumptionRate, planetExitFuelAmount: fleet.account.stats.movementStats.planetExitFuelAmount, destCoord: fleetDest, starbaseCoord: fleetStarbase, scanBlock: fleetScanBlock, scanBlockIdx: 0, scanEnd: 0, scanSkipCnt: 0, scanSectorStart: 0, scanMin: fleetScanMin, scanMove: fleetScanMove, toolCnt: currentToolCnt.account.data.parsed.info.tokenAmount.uiAmount, sduCnt: 0, fuelCnt: currentFuelCnt.account.data.parsed.info.tokenAmount.uiAmount, moveType: fleetMoveType, mineResource: fleetMineResource, minePlanet: null});
+                userFleets.push({publicKey: fleet.publicKey, label: fleetLabel.replace(/\0/g, ''), state: fleetState, moveTarget: fleetMoveTarget, startingCoords: fleetCoords, cargoHold: fleet.account.cargoHold, fuelTank: fleet.account.fuelTank, ammoBank: fleet.account.ammoBank, repairKitToken: fleetRepairKitToken, sduToken: fleetSduToken, fuelToken: fleetFuelToken, warpFuelConsumptionRate: fleet.account.stats.movementStats.warpFuelConsumptionRate, warpSpeed: fleet.account.stats.movementStats.warpSpeed, maxWarpDistance: fleet.account.stats.movementStats.maxWarpDistance, subwarpFuelConsumptionRate: fleet.account.stats.movementStats.subwarpFuelConsumptionRate, subwarpSpeed: fleet.account.stats.movementStats.subwarpSpeed, cargoCapacity: fleet.account.stats.cargoStats.cargoCapacity, fuelCapacity: fleet.account.stats.cargoStats.fuelCapacity, ammoCapacity: fleet.account.stats.cargoStats.ammoCapacity, scanCost: fleet.account.stats.miscStats.scanRepairKitAmount, scanCooldown: fleet.account.stats.miscStats.scanCoolDown, warpCooldown: fleet.account.stats.movementStats.warpCoolDown, miningRate: fleet.account.stats.cargoStats.miningRate, foodConsumptionRate: fleet.account.stats.cargoStats.foodConsumptionRate, ammoConsumptionRate: fleet.account.stats.cargoStats.ammoConsumptionRate, planetExitFuelAmount: fleet.account.stats.movementStats.planetExitFuelAmount, destCoord: fleetDest, starbaseCoord: fleetStarbase, scanBlock: fleetScanBlock, scanBlockIdx: 0, scanEnd: 0, scanSkipCnt: 0, scanSectorStart: 0, scanMin: fleetScanMin, scanNewCooldown: fleetScanNewCooldown, scanSameSpot: fleetScanSameSpot, scanMove: fleetScanMove, toolCnt: currentToolCnt.account.data.parsed.info.tokenAmount.uiAmount, sduCnt: 0, fuelCnt: currentFuelCnt.account.data.parsed.info.tokenAmount.uiAmount, moveType: fleetMoveType, mineResource: fleetMineResource, minePlanet: null});
             }
             userFleets.sort(function (a, b) {
                 return a.label.toUpperCase().localeCompare(b.label.toUpperCase());
@@ -1431,9 +1433,41 @@
         scanMinDiv.appendChild(scanMinLabel);
         scanMinDiv.appendChild(scanMin);
         let scanMinTd = document.createElement('td');
-        scanMinTd.setAttribute('colspan', '3');
+        scanMinTd.setAttribute('colspan', '1');
         scanMinTd.appendChild(scanMinDiv);
         scanRow.appendChild(scanMinTd);
+
+        let scanNewCooldownLabel = document.createElement('span');
+        scanNewCooldownLabel.innerHTML = 'Scan Cooldown:';
+        let scanNewCooldown = document.createElement('input');
+        scanNewCooldown.setAttribute('type', 'text');
+        scanNewCooldown.placeholder = 'minute';
+        scanNewCooldown.style.width = '50px';
+        scanNewCooldown.style.marginRight = '10px';
+        scanNewCooldown.value = fleetParsedData && fleetParsedData.scanNewCooldown ? fleetParsedData.scanNewCooldown : '';
+        let scanNewCooldownDiv = document.createElement('div');
+        scanNewCooldownDiv.appendChild(scanNewCooldownLabel);
+        scanNewCooldownDiv.appendChild(scanNewCooldown);
+        let scanNewCooldownTd = document.createElement('td');
+        scanNewCooldownTd.setAttribute('colspan', '1');
+        scanNewCooldownTd.appendChild(scanNewCooldownDiv);
+        scanRow.appendChild(scanNewCooldownTd);
+
+        let scanSameSpotLabel = document.createElement('span');
+        scanSameSpotLabel.innerHTML = 'Stay in the same place:';
+        let scanSameSpot = document.createElement('input');
+        scanSameSpot.setAttribute('type', 'text');
+        scanSameSpot.placeholder = '4';
+        scanSameSpot.style.width = '30px';
+        scanSameSpot.style.marginRight = '10px';
+        scanSameSpot.value = fleetParsedData && fleetParsedData.scanSameSpot ? fleetParsedData.scanSameSpot : '';
+        let scanSameSpotDiv = document.createElement('div');
+        scanSameSpotDiv.appendChild(scanSameSpotLabel);
+        scanSameSpotDiv.appendChild(scanSameSpot);
+        let scanSameSpotTd = document.createElement('td');
+        scanSameSpotTd.setAttribute('colspan', '2');
+        scanSameSpotTd.appendChild(scanSameSpotDiv);
+        scanRow.appendChild(scanSameSpotTd);
 
         let scanMoveLabel = document.createElement('span');
         scanMoveLabel.innerHTML = 'Move While Scanning:';
@@ -1776,7 +1810,9 @@
             }
 
             let scanMin = parseInt(scanRows[i].children[1].children[0].children[1].value) || 0;
-            let scanMove = scanRows[i].children[2].children[0].children[1].checked;
+            let scanNewCooldown = parseInt(scanRows[i].children[2].children[0].children[1].value) || 0;
+            let scanSameSpot = parseInt(scanRows[i].children[3].children[0].children[1].value) || 0;
+            let scanMove = scanRows[i].children[4].children[0].children[1].checked;
 
             let fleetMineResource = mineRows[i].children[1].children[1].value;
             fleetMineResource = fleetMineResource !== '' ? resourceTokens.find(r => r.name == fleetMineResource).token : '';
@@ -1869,13 +1905,15 @@
                 scanBlock.push([destX+scanShiftX, destY]);
                 scanBlock.push([destX+scanShiftX, destY+scanShiftY]);
                 scanBlock.push([destX, destY+scanShiftY]);
-                await GM.setValue(fleetPK, `{\"name\": \"${fleetName}\", \"assignment\": \"${fleetAssignment}\", \"mineResource\": \"${fleetMineResource}\", \"dest\": \"${fleetDestCoord}\", \"starbase\": \"${fleetStarbaseCoord}\", \"moveType\": \"${moveType}\", \"subwarpPref\": \"${subwarpPref}\", \"moveTarget\": \"${fleetMoveTarget}\", \"transportResource1\": \"${transportResource1}\", \"transportResource1Perc\": ${transportResource1Perc}, \"transportResource2\": \"${transportResource2}\", \"transportResource2Perc\": ${transportResource2Perc}, \"transportResource3\": \"${transportResource3}\", \"transportResource3Perc\": ${transportResource3Perc}, \"transportResource4\": \"${transportResource4}\", \"transportResource4Perc\": ${transportResource4Perc}, \"transportSBResource1\": \"${transportSBResource1}\", \"transportSBResource1Perc\": ${transportSBResource1Perc}, \"transportSBResource2\": \"${transportSBResource2}\", \"transportSBResource2Perc\": ${transportSBResource2Perc}, \"transportSBResource3\": \"${transportSBResource3}\", \"transportSBResource3Perc\": ${transportSBResource3Perc}, \"transportSBResource4\": \"${transportSBResource4}\", \"transportSBResource4Perc\": ${transportSBResource4Perc}, \"scanBlock\": ${JSON.stringify(scanBlock)}, \"scanMin\": ${scanMin}, \"scanMove\": \"${scanMove}\"}`);
+                await GM.setValue(fleetPK, `{\"name\": \"${fleetName}\", \"assignment\": \"${fleetAssignment}\", \"mineResource\": \"${fleetMineResource}\", \"dest\": \"${fleetDestCoord}\", \"starbase\": \"${fleetStarbaseCoord}\", \"moveType\": \"${moveType}\", \"subwarpPref\": \"${subwarpPref}\", \"moveTarget\": \"${fleetMoveTarget}\", \"transportResource1\": \"${transportResource1}\", \"transportResource1Perc\": ${transportResource1Perc}, \"transportResource2\": \"${transportResource2}\", \"transportResource2Perc\": ${transportResource2Perc}, \"transportResource3\": \"${transportResource3}\", \"transportResource3Perc\": ${transportResource3Perc}, \"transportResource4\": \"${transportResource4}\", \"transportResource4Perc\": ${transportResource4Perc}, \"transportSBResource1\": \"${transportSBResource1}\", \"transportSBResource1Perc\": ${transportSBResource1Perc}, \"transportSBResource2\": \"${transportSBResource2}\", \"transportSBResource2Perc\": ${transportSBResource2Perc}, \"transportSBResource3\": \"${transportSBResource3}\", \"transportSBResource3Perc\": ${transportSBResource3Perc}, \"transportSBResource4\": \"${transportSBResource4}\", \"transportSBResource4Perc\": ${transportSBResource4Perc}, \"scanBlock\": ${JSON.stringify(scanBlock)}, \"scanMin\": ${scanMin}, \"scanNewCooldown\": ${scanNewCooldown}, \"scanSameSpot\": ${scanSameSpot}, \"scanMove\": \"${scanMove}\"}`);
                 userFleets[userFleetIndex].mineResource = fleetMineResource;
                 userFleets[userFleetIndex].destCoord = fleetDestCoord;
                 userFleets[userFleetIndex].starbaseCoord = fleetStarbaseCoord;
                 userFleets[userFleetIndex].moveType = moveType;
                 userFleets[userFleetIndex].scanBlock = scanBlock;
                 userFleets[userFleetIndex].scanMin = scanMin;
+                userFleets[userFleetIndex].scanNewCooldown = scanNewCooldown;
+                userFleets[userFleetIndex].scanSameSpot = scanSameSpot;
                 userFleets[userFleetIndex].scanMove = scanMove;
             }
         }
@@ -2140,9 +2178,13 @@
                 console.log(`[${userFleets[i].label}] Tools Remaining: ${changesTool.postBalance}`);
                 userFleets[i].toolCnt = changesTool.postBalance;
                 userFleets[i].sduCnt = changesSDU.postBalance;
-                if (userFleets[i].scanSkipCnt < 10) {
+                if (userFleets[i].scanSkipCnt < userFleets[i].scanSameSpot) {
                     userFleets[i].state = `Scanning [${scanCondition}%]`;
-                    userFleets[i].scanEnd = Date.now() + (userFleets[i].scanCooldown * 1000 + 2000);
+                    let newScanCooldown = ((userFleets[i].scanNewCooldown + 1) * 60000) - userFleets[i].scanCooldown * 1000 + 2000
+                    userFleets[i].scanEnd = Date.now() + (newScanCooldown);
+                    console.log(`[${userFleets[i].label}]: You have set in-place scanning to: ${userFleets[i].scanSameSpot}x`);
+                    console.log(`[${userFleets[i].label}]: So far you have scanned ${userFleets[i].scanSkipCnt}x without success`);
+                    console.log(`[${userFleets[i].label}]: You have set the scan time to: [${(newScanCooldown/60000)} minutes]`);
                 } else {
                     // Paused - 1 min
                     userFleets[i].scanEnd = Date.now() + 60000;
